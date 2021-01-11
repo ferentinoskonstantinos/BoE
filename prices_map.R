@@ -1,5 +1,5 @@
 # This R script can be used to replicate the map of geographic regions in England and Wales
-# that shows the average price in each region in our final sample
+# that shows the mean price in each region in our final sample
 # for the paper "Climate Policy and Transition Risk in the Housing Market"
 # by Konstantinos Ferentinos & Alex Gibberd & Benjamin Guin.
 # The code was developed by Konstantinos Ferentinos.
