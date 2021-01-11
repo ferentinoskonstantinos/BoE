@@ -12,8 +12,6 @@ library(psych)
 library(ggplot2)
 library(ggpubr)
 
-## Data Processing ##
-
 # In order to make the R code portable,
 # whenever I intend to import or save data in a CSV format
 # I define a variable with the name 'my_path' early in each R script 
