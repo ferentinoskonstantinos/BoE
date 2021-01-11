@@ -1,3 +1,8 @@
+# This R script can be used to replicate the descriptive analyses
+# for the paper "Climate Policy and Transition Risk in the Housing Market"
+# by Konstantinos Ferentinos & Alex Gibberd & Benjamin Guin.
+# The code was developed by Konstantinos Ferentinos.
+
 library(dplyr)
 library(plyr)
 library(readr)
@@ -11,7 +16,15 @@ library(cowplot)
 
 ## Transactions level Descriptive Statistics ##
 
-data<-fread('D:\\processed_final_data.csv', header = T, 
+# In order to make the R code portable,
+# whenever I intend to import or save data in a CSV format
+# I define a variable with the name 'my_path' early in each R script 
+# that stores the path to each CSV file that is used in the code.
+# That way each user of the code can easily change the path at will,
+# thus improving its reproducibility.
+my_path<-'data\\'
+
+data<-fread(paste(my_path, 'processed_final_data.csv', sep='\\'), header = T, 
             data.table=FALSE)
 head(data)
 dim(data)
@@ -22,7 +35,8 @@ class(data$Date)
 prop.table(table(data$CURRENT_ENERGY_RATING))
 
 # Barplot of the relative frequencies of EPC ratings 
-# before and after the MEES 2018 policy intervention
+# before and after the MEES 2018 policy intervention,
+# that corresponds to Figure 3a of the paper.
 EPC_intervention<-data.frame(EPC=toupper(letters[1:7]),
                              Proportion=c(as.numeric(prop.table(table(select(filter(data, 
                                                                                     Date < "2018-04-01"), 
@@ -51,7 +65,8 @@ ggplot(EPC_intervention, aes(fill=Period, y=Proportion, x=EPC)) +
 
 
 # Barplot of the average transaction price by EPC ratings 
-# before and after the MEES 2018 policy intervention
+# before and after the MEES 2018 policy intervention,
+# that corresponds to Figure 3b of the paper.
 data$Period<-as.factor(ifelse(data$Date >= ymd("2018-04-01"), 
                               "After MEES 2018", "Before MEES 2018"))
 
@@ -72,8 +87,9 @@ ggplot(data, aes(x=CURRENT_ENERGY_RATING, y=Price/1000, fill=Period)) +
         legend.position="bottom",
         legend.background = element_rect(linetype="solid", colour ="black"))
 
-# Density plots
 
+# Density plot for Price variable,
+# as shown in Figure 4a of the paper.
 ggplot(filter(data, 
               Date < "2018-04-01"), aes(x=Price/1000, fill=EPC_LEVEL)) +
   geom_density(alpha=0.4) +
@@ -93,6 +109,9 @@ ggplot(filter(data,
         legend.position="bottom",
         legend.background = element_rect(linetype="solid", colour ="black"))
 
+
+# Density plot for Price variable,
+# as shown in Figure 4c of the paper.
 ggplot(filter(data, 
               Date >= "2018-04-01"), aes(x=Price/1000, fill=EPC_LEVEL)) +
   geom_density(alpha=0.4) +
