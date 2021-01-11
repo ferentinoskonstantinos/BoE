@@ -1,3 +1,9 @@
+# This R script can be used to replicate the DiD analysis
+# for the sensitivity analysis that trims at the 5th and 95th percentile of prices
+# for the paper "Climate Policy and Transition Risk in the Housing Market"
+# by Konstantinos Ferentinos & Alex Gibberd & Benjamin Guin.
+# The code was developed by Konstantinos Ferentinos.
+
 library(dplyr)
 library(plyr)
 library(readr)
@@ -10,9 +16,15 @@ library(lmtest)
 library(plm)
 library(moments)
 
-## Estimation of the Intervention Effect via the Difference-in-Difference Model ##
+# In order to make the R code portable,
+# whenever I intend to import or save data in a CSV format
+# I define a variable with the name 'my_path' early in each R script 
+# that stores the path to each CSV file that is used in the code.
+# That way each user of the code can easily change the path at will,
+# thus improving its reproducibility.
+my_path<-'data\\'
 
-data<-fread('D:\\5pc_modified_data.csv', header = T, 
+data<-fread(paste(my_path, '5pc_modified_data.csv', sep='\\'), header = T, 
             data.table=FALSE)
 head(data)
 dim(data)
@@ -38,7 +50,7 @@ levels(data$CONSTRUCTION_AGE_BAND)[4:5]<-"1996-2006"
 
 
 # We upload the PSM-derived matched dataset.
-psm_data<-fread('D:\\5pc_psm_data.csv', header = T, 
+psm_data<-fread(paste(my_path, '5pc_psm_data.csv', sep='\\'), header = T, 
                 data.table=FALSE)
 head(psm_data)
 dim(psm_data)
@@ -118,7 +130,8 @@ head(res)
 d<-pdata.frame(res, index = c("property", "Post"), drop.index = FALSE)
 head(d)
 
-# We fit the DiD model on the full balanced panel.
+# We fit the DiD model on the full balanced panel,
+# and replicate column (1) of Table 9 of the paper.
 did_reg <- plm(Price ~ Post + D, data = d, model = "within")
 summary(did_reg)
 
@@ -138,12 +151,14 @@ d_rented<-pdata.frame(res_rented, index = c("property", "Post"), drop.index = FA
 head(d_rented)
 
 # We fit the DiD model on the sub-sample of properties 
-# that have been private rented at least once.
+# that have been private rented at least once,
+# and replicate column (2) of Table 9 of the paper.
 did_rented <- plm(Price ~ Post + D, data = d_rented, model = "within")
 summary(did_rented)
 
 coeftest(did_rented, vcov=function(x) vcovHC(x, cluster="group", type="HC1"))
 
+# We replicate the QQ-plot in Figure 9b of the paper.
 options(scipen = 999)
 df <- data.frame(y = residuals(did_reg))
 ggplot(df, aes(sample = y)) + 
@@ -159,6 +174,7 @@ ggplot(df, aes(sample = y)) +
         text = element_text(size=20),
         legend.text=element_text(size=20))
 
-# We calculate the skewness and kurtosis values for the residuals.
+# We calculate the skewness and kurtosis values for the residuals
+# of the DiD model on the full balanced panel.
 round(skewness(residuals(did_reg)), 3)
 round(kurtosis(residuals(did_reg)), 3)
