@@ -1,3 +1,9 @@
+# This R script can be used to replicate the sensitivity analysis
+# using a logarithmic transformation of the prices
+# for the paper "Climate Policy and Transition Risk in the Housing Market"
+# by Konstantinos Ferentinos & Alex Gibberd & Benjamin Guin.
+# The code was developed by Konstantinos Ferentinos.
+
 library(dplyr)
 library(plyr)
 library(readr)
@@ -14,9 +20,17 @@ library(lmtest)
 library(plm)
 library(moments)
 
-## Examining Pre-intervention Price Trends via Generalized Additive Models ##
+## GAM Analysis ##
 
-data<-fread('D:\\psm_data_main.csv', header = T, 
+# In order to make the R code portable,
+# whenever I intend to import or save data in a CSV format
+# I define a variable with the name 'my_path' early in each R script 
+# that stores the path to each CSV file that is used in the code.
+# That way each user of the code can easily change the path at will,
+# thus improving its reproducibility.
+my_path<-'data\\'
+
+data<-fread(paste(my_path, 'psm_data_main.csv', sep='\\'), header = T, 
             data.table=FALSE)
 head(data)
 dim(data)
@@ -53,9 +67,9 @@ summary(fit)
 rm(data, fit, cols)
 
 
-## Estimation of the Intervention Effect via the Difference-in-Difference Model ##
+## DiD Analysis ##
 
-data<-fread('D:\\processed_final_data.csv', header = T, 
+data<-fread(paste(my_path, 'processed_final_data.csv', sep='\\'), header = T, 
             data.table=FALSE)
 head(data)
 dim(data)
@@ -81,7 +95,7 @@ levels(data$CONSTRUCTION_AGE_BAND)[4:5]<-"1996-2006"
 
 
 # We upload the PSM-derived matched dataset.
-psm_data<-fread('D:\\psm_data_main.csv', header = T, 
+psm_data<-fread(paste(my_path, 'psm_data_main.csv', sep='\\'), header = T, 
                 data.table=FALSE)
 head(psm_data)
 dim(psm_data)
