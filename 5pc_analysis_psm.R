@@ -1,3 +1,9 @@
+# This R script can be used to replicate the Propensity Score Matching analysis
+# for the sensitivity analysis that trims at the 5th and 95th percentile of prices
+# for the paper "Climate Policy and Transition Risk in the Housing Market"
+# by Konstantinos Ferentinos & Alex Gibberd & Benjamin Guin.
+# The code was developed by Konstantinos Ferentinos.
+
 library(dplyr)
 library(plyr)
 library(readr)
@@ -16,9 +22,15 @@ library(pROC)
 library(rpart.plot)
 library(randomForest)
 
-## Propensity Score Matching ##
+# In order to make the R code portable,
+# whenever I intend to import or save data in a CSV format
+# I define a variable with the name 'my_path' early in each R script 
+# that stores the path to each CSV file that is used in the code.
+# That way each user of the code can easily change the path at will,
+# thus improving its reproducibility.
+my_path<-'data\\'
 
-data<-fread('D:\\5pc_modified_data.csv', header = T, 
+data<-fread(paste(my_path, '5pc_modified_data.csv', sep='\\'), header = T, 
             data.table=FALSE)
 head(data)
 dim(data)
@@ -59,7 +71,7 @@ nrow(res)
 head(res)
 res<-mutate(res, Class = ifelse(EPC_LEVEL=='Below E', 1, 0))
 
-# Summary of balance for all data before matching
+# Summary of balance for all data before matching.
 xvars <- colnames(res)[c(15,16,18,19,24:26)]
 table1 <- CreateTableOne(vars = xvars, strata = "EPC_LEVEL", data = res, test = FALSE)
 print(table1, smd = TRUE)
@@ -180,15 +192,6 @@ plot(my_roc_boost)
 
 auc(my_roc_boost)
 
-# Now, we plot the ROC curve for each of the fitted classifiers.
-plot(my_roc_glm,col="blue", cex.lab=1.5)
-
-legend(0.45, 0.5, c('Logistic Regression', 'Random Forest', 
-                    'XGBoost'), c('blue', 'red', 'black'), cex=1.05)
-
-plot(my_roc_rf,add=TRUE,col="red")
-plot(my_roc_boost,add=TRUE,col="black")
-
 
 # We use XGBoost to estimate the propensity scores,
 # and implement PSM with one-to-one nearest neighbor method.
@@ -241,5 +244,5 @@ all(dta_nearest1$Date < "2018-04-01")
 
 # We save the PSM-derived matched dataset,
 # as a csv file.
-#fwrite(dta_nearest1, 'D:\\5pc_psm_data.csv')
+fwrite(dta_nearest1, paste(my_path, '5pc_psm_data.csv', sep='\\'))
 
