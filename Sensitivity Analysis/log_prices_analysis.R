@@ -66,7 +66,6 @@ summary(fit)
 
 rm(data, fit, cols)
 
-
 ## DiD Analysis ##
 
 data<-fread(paste(my_path, 'processed_final_data.csv', sep='\\'), header = T, 
@@ -92,7 +91,6 @@ rm(cols)
 levels(data$CONSTRUCTION_AGE_BAND)[2:3]<-"1930-1966"
 levels(data$CONSTRUCTION_AGE_BAND)[3:6]<-"1967-1995"
 levels(data$CONSTRUCTION_AGE_BAND)[4:5]<-"1996-2006"
-
 
 # We upload the PSM-derived matched dataset.
 psm_data<-fread(paste(my_path, 'psm_data_main.csv', sep='\\'), header = T, 
