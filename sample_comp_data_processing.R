@@ -1,3 +1,8 @@
+# This R script can be used to replicate the results of Table 11
+# for the paper "Climate Policy and Transition Risk in the Housing Market"
+# by Konstantinos Ferentinos & Alex Gibberd & Benjamin Guin.
+# The code was developed by Konstantinos Ferentinos.
+
 library(dplyr)
 library(plyr)
 library(readr)
@@ -9,7 +14,15 @@ library(ggpubr)
 
 ## Data Processing ##
 
-data<-fread('D:\\unique_epc_data.csv', header = T, 
+# In order to make the R code portable,
+# whenever I intend to import or save data in a CSV format
+# I define a variable with the name 'my_path' early in each R script 
+# that stores the path to each CSV file that is used in the code.
+# That way each user of the code can easily change the path at will,
+# thus improving its reproducibility.
+my_path<-'data\\'
+
+data<-fread(paste(my_path, 'unique_epc_data.csv', sep='\\'), header = T, 
             data.table=FALSE)
 head(data)
 dim(data)
@@ -24,7 +37,7 @@ head(select(data, c(CURRENT_ENERGY_RATING, EPC_LEVEL)))
 
 # Next, the postcode of each property in the dataset 
 # is matched with the corresponding 2011 OAC code, which ranges from 1a1 to 8d3.
-codes<-fread('D:\\ONSPD_MAY_2020_UK.csv', header = T, 
+codes<-fread(paste(my_path, 'ONSPD\\Data\\ONSPD_MAY_2020_UK.csv', sep='\\'), header = T, 
              data.table=FALSE)
 head(codes)
 dim(codes)
@@ -40,12 +53,12 @@ head(res)
 res<-select(res, -pcd)
 
 # We save the data frame with the added feature of the 2011 OAC codes.
-#fwrite(res, 'D:\\unique_data_merged_epc.csv')
+fwrite(res, paste(my_path, 'unique_data_merged_epc.csv', sep='\\'))
 
 rm(codes, data, res)
 
 # We add the Supergroup cluster names as a column in the dataset.
-data<-fread('D:\\unique_data_merged_epc.csv', header = T, 
+data<-fread(paste(my_path, 'unique_data_merged_epc.csv', sep='\\'), header = T, 
             data.table=FALSE)
 head(data)
 dim(data)
@@ -53,7 +66,7 @@ dim(data)
 data$INSPECTION_DATE<-ymd(data$INSPECTION_DATE)
 class(data$INSPECTION_DATE)
 
-oac11_data<-fread('D:\\Output_Area_Classification__December_2011__in_the_United_Kingdom.csv', header = T, 
+oac11_data<-fread(paste(my_path, 'Output_Area_Classification__December_2011__in_the_United_Kingdom.csv', sep='\\'), header = T, 
                   data.table=FALSE)
 head(oac11_data)
 dim(oac11_data)
@@ -64,7 +77,6 @@ oac11_data$oac11<-trimws(sub(":.*", "", oac11_data$Subgroup))
 oac11_data<-select(oac11_data, c(Group1, oac11))
 
 # The dataset that holds the three tiers of OAC clusters 
-# and can be sourced from the Open Geography Portal, 
 # is used to match each 2011 OAC code in the EPC dataset 
 # with the 8 Supergroup cluster names.
 res<-inner_join(data, oac11_data, by='oac11')
@@ -76,7 +88,7 @@ head(res)
 # with the corresponding NUTS Level 1 name.
 colnames(res)[16]<-'LAU118CD'
 
-codes<-fread('D:\\LAU218_LAU118_NUTS318_NUTS218_NUTS118_UK_LU.csv', header = T, 
+codes<-fread(paste(my_path, 'ONSPD\\Documents\\LAU218_LAU118_NUTS318_NUTS218_NUTS118_UK_LU.csv', sep='\\'), header = T, 
              data.table=FALSE)
 head(codes)
 dim(codes)
@@ -94,7 +106,8 @@ head(data1)
 
 rm(codes,data,oac11_data,res,test)
 
-# We proceed with removing missing values.
+# We proceed with removing missing values,
+# indicated either as 'NA', '', 'NO DATA!', 'unknown', or 'INVALID'.
 cols <- colnames(data1)[c(8,11,14,15)]
 
 data1[cols] <- lapply(data1[cols], factor)
@@ -116,12 +129,12 @@ data1<-data1[complete.cases(data1),]
 nrow(data1)
 head(data1)
 
-#fwrite(data1, 'D:\\unique_modified_data.csv')
+fwrite(data1, paste(my_path, 'unique_modified_data.csv', sep='\\'))
 
 rm(data1, cols)
 
 # Processing the sample of repeated property sales employed in the main analysis.
-data<-fread('D:\\processed_final_data.csv', header = T, 
+data<-fread(paste(my_path, 'processed_final_data.csv', sep='\\'), header = T, 
             data.table=FALSE)
 head(data)
 dim(data)
@@ -141,12 +154,12 @@ head(data_cs)
 
 data_cs<-mutate(data_cs, Dataset=rep("Repeated_Sales", nrow(data_cs)))
 
-##fwrite(data_cs, 'D:\\repeated_sales.csv')
+fwrite(data_cs, paste(my_path, 'repeated_sales.csv', sep='\\'))
 
 rm(data, data_cs)
 
-# Processing the random sample of the population of all properties
-data<-fread('D:\\unique_modified_data.csv', header = T, 
+# Processing the random sample of the population of all properties.
+data<-fread(paste(my_path, 'unique_modified_data.csv', sep='\\'), header = T, 
             data.table=FALSE)
 head(data)
 dim(data)
@@ -158,4 +171,4 @@ data<-mutate(data, Dataset=rep("Random_Sample", nrow(data)))
 
 data<-select(data, -c(ADDRESS1, ADDRESS2, ADDRESS3, POSTTOWN))
 
-##fwrite(data, 'D:\\random_sample.csv')
+fwrite(data, paste(my_path, 'random_sample.csv', sep='\\'))
