@@ -1,3 +1,9 @@
+# This R script can be used to replicate the feature engineering process
+# for the sensitivity analysis that trims at the 5th and 95th percentile of prices
+# for the paper "Climate Policy and Transition Risk in the Housing Market"
+# by Konstantinos Ferentinos & Alex Gibberd & Benjamin Guin.
+# The code was developed by Konstantinos Ferentinos.
+
 library(dplyr)
 library(plyr)
 library(readr)
@@ -7,10 +13,16 @@ library(psych)
 library(ggplot2)
 library(ggpubr)
 
-## Data Processing ##
+# In order to make the R code portable,
+# whenever I intend to import or save data in a CSV format
+# I define a variable with the name 'my_path' early in each R script 
+# that stores the path to each CSV file that is used in the code.
+# That way each user of the code can easily change the path at will,
+# thus improving its reproducibility.
+my_path<-'data\\'
 
 # We proceed with checking for outliers in the Price variable.
-data<-fread('D:\\initial_data1.csv', header = T, 
+data<-fread(paste(my_path, 'initial_data1.csv', sep='\\'), header = T, 
             data.table=FALSE)
 head(data)
 dim(data)
@@ -53,28 +65,17 @@ nrow(trimmed_data)
 head(trimmed_data)
 
 # We save the trimmed dataset as a csv file.
-#fwrite(trimmed_data, 'D:\\5pc_trimmed_data.csv')
+fwrite(trimmed_data, paste(my_path, '5pc_trimmed_data.csv', sep='\\'))
 
 # The trimming of the data based on the percentiles of the Price variable, 
 # has mitigated the issue of the outliers.
 describe(data$Price)
 describe(trimmed_data$Price)
 
-ggplot(trimmed_data, aes(x=Price)) + 
-  geom_histogram(aes(y=..density..), col="red", fill="grey", bins=15)+
-  geom_density(alpha=.2, fill="red") +
-  theme(axis.line = element_line(colour = "black"),
-        panel.grid.major = element_blank(),
-        panel.grid.minor = element_blank(),
-        panel.border = element_blank(),
-        panel.background = element_blank(),
-        text = element_text(size=20),
-        legend.text=element_text(size=20))
-
 rm(data, res, test, trimmed, trimmed_data, unique_ID)
 
 # We add the Supergroup cluster names as a column in the trimmed dataset.
-data<-fread('D:\\5pc_trimmed_data.csv', header = T, 
+data<-fread(paste(my_path, '5pc_trimmed_data.csv', sep='\\'), header = T, 
             data.table=FALSE)
 head(data)
 dim(data)
@@ -82,7 +83,7 @@ dim(data)
 data$Date<-ymd(data$Date)
 class(data$Date)
 
-oac11_data<-fread('D:\\Output_Area_Classification__December_2011__in_the_United_Kingdom.csv', header = T, 
+oac11_data<-fread(paste(my_path, 'Output_Area_Classification__December_2011__in_the_United_Kingdom.csv', sep='\\'), header = T, 
                   data.table=FALSE)
 head(oac11_data)
 dim(oac11_data)
@@ -105,7 +106,7 @@ head(res)
 # with the corresponding NUTS Level 1 name.
 colnames(res)[20]<-'LAU118CD'
 
-codes<-fread('D:\\LAU218_LAU118_NUTS318_NUTS218_NUTS118_UK_LU.csv', header = T, 
+codes<-fread(paste(my_path, 'ONSPD\\Documents\\LAU218_LAU118_NUTS318_NUTS218_NUTS118_UK_LU.csv', sep='\\'), header = T, 
              data.table=FALSE)
 head(codes)
 dim(codes)
@@ -123,7 +124,8 @@ head(data1)
 
 rm(codes,data,oac11_data,res,test)
 
-# We proceed with removing missing values.
+# We proceed with removing missing values,
+# indicated either as 'NA', '', 'NO DATA!', 'unknown', or 'INVALID'.
 cols <- colnames(data1)[c(18,19)]
 
 data1[cols] <- lapply(data1[cols], factor)
@@ -168,4 +170,4 @@ head(data1)
 
 # We save the final version of our merged panel dataset,
 # as a csv file.
-#fwrite(data1, 'D:\\5pc_modified_data.csv')
+fwrite(data1, paste(my_path, '5pc_modified_data.csv', sep='\\'))
