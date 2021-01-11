@@ -1,12 +1,26 @@
+# This R script can be used to replicate the results of Table 11
+# for the paper "Climate Policy and Transition Risk in the Housing Market"
+# by Konstantinos Ferentinos & Alex Gibberd & Benjamin Guin.
+# The code was developed by Konstantinos Ferentinos.
+
 library(dplyr)
 library(plyr)
 library(readr)
 library(lubridate)
 library(data.table)
 
+# In order to make the R code portable,
+# whenever I intend to import or save data in a CSV format
+# I define a variable with the name 'my_path' early in each R script 
+# that stores the path to each CSV file that is used in the code.
+# That way each user of the code can easily change the path at will,
+# thus improving its reproducibility.
+my_path<-'data\\'
+
 # First, we produce a list containing the names of files in the directory
-# that holds the 340 certificates.
-file_names<-list.files("D:\\EPC", full.names = TRUE)
+# that holds the 340 energy performance certificates,
+# and we take a random sample of the population of all properties.
+file_names<-list.files(paste(my_path, 'EPC', sep='\\'), full.names = TRUE)
 
 file_names<-paste(file_names, 'certificates.csv', sep='\\')
 
@@ -29,7 +43,7 @@ for(i in 1:length(names1)){
 }
 
 data1 <- rbindlist(df)
-##fwrite(data1, 'D:\\unique_epc_data1.csv')
+fwrite(data1, paste(my_path, 'unique_epc_data1.csv', sep='\\'))
 
 rm(df,data1,names1)
 
@@ -51,7 +65,7 @@ for(i in 1:length(names1)){
 }
 
 data1 <- rbindlist(df)
-##fwrite(data1, 'D:\\unique_epc_data2.csv')
+fwrite(data1, paste(my_path, 'unique_epc_data2.csv', sep='\\'))
 
 rm(df,data1,names1)
 
@@ -73,7 +87,7 @@ for(i in 1:length(names1)){
 }
 
 data1 <- rbindlist(df)
-##fwrite(data1, 'D:\\unique_epc_data3.csv')
+fwrite(data1, paste(my_path, 'unique_epc_data3.csv', sep='\\'))
 
 rm(df,data1,names1)
 
@@ -95,7 +109,7 @@ for(i in 1:length(names1)){
 }
 
 data1 <- rbindlist(df)
-##fwrite(data1, 'D:\\unique_epc_data4.csv')
+fwrite(data1, paste(my_path, 'unique_epc_data4.csv', sep='\\'))
 
 rm(df,data1,names1)
 
@@ -117,31 +131,31 @@ for(i in 1:length(names1)){
 }
 
 data1 <- rbindlist(df)
-##fwrite(data1, 'D:\\unique_epc_data5.csv')
+fwrite(data1, paste(my_path, 'unique_epc_data5.csv', sep='\\'))
 
 
 # We then upload the five different csv files.
-epc_1<-fread('D:\\unique_epc_data1.csv', header = T, 
+epc_1<-fread(paste(my_path, 'unique_epc_data1.csv', sep='\\'), header = T, 
              data.table=FALSE)
 epc_1$ADDRESS<-gsub(",","", toupper(epc_1$ADDRESS))
 
-epc_2<-fread('D:\\unique_epc_data2.csv', header = T, 
+epc_2<-fread(paste(my_path, 'unique_epc_data2.csv', sep='\\'), header = T, 
              data.table=FALSE)
 epc_2$ADDRESS<-gsub(",","", toupper(epc_2$ADDRESS))
 
-epc_3<-fread('D:\\unique_epc_data3.csv', header = T, 
+epc_3<-fread(paste(my_path, 'unique_epc_data3.csv', sep='\\'), header = T, 
              data.table=FALSE)
 epc_3$ADDRESS<-gsub(",","", toupper(epc_3$ADDRESS))
 
-epc_4<-fread('D:\\unique_epc_data4.csv', header = T, 
+epc_4<-fread(paste(my_path, 'unique_epc_data4.csv', sep='\\'), header = T, 
              data.table=FALSE)
 epc_4$ADDRESS<-gsub(",","", toupper(epc_4$ADDRESS))
 
-epc_5<-fread('D:\\unique_epc_data5.csv', header = T, 
+epc_5<-fread(paste(my_path, 'unique_epc_data5.csv', sep='\\'), header = T, 
              data.table=FALSE)
 epc_5$ADDRESS<-gsub(",","", toupper(epc_5$ADDRESS))
 
 # We merge the five csv files into a single EPC dataset.
 l<-list(epc_1, epc_2, epc_3, epc_4, epc_5)
 epc_data<-rbindlist(l)
-#fwrite(epc_data, 'D:\\unique_epc_data.csv')
+fwrite(epc_data, paste(my_path, 'unique_epc_data.csv', sep='\\'))
