@@ -1,3 +1,8 @@
+# This R script can be used to replicate the data sourcing process
+# for the paper "Climate Policy and Transition Risk in the Housing Market"
+# by Konstantinos Ferentinos & Alex Gibberd & Benjamin Guin.
+# The code was developed by Konstantinos Ferentinos.
+
 library(dplyr)
 library(plyr)
 library(readr)
@@ -6,47 +11,50 @@ library(data.table)
 
 ## Data on property transactions ##
 
-# I first construct the Price dataset covering the period 2015-2019,
-# by uploading the yearly data files sourced from the HM Land Registry website
-# https://data.gov.uk/dataset/314f77b3-e702-4545-8bcb-9ef8262ea0fd/archived-price-paid-data-1995-to-2017.
+# After the yearly CSV files for the period 2015-2019,
+# are downloaded from the HM Land Registry website
+# https://data.gov.uk/dataset/314f77b3-e702-4545-8bcb-9ef8262ea0fd/archived-price-paid-data-1995-to-2017,
+# I proceed to collate them into a single dataset.
+# In all the R scripts whenever I import or save data in a CSV format,
+# I phrase the path as 'data\\nameofthefile.csv'.
 
-df_15<-fread('pp-2015.csv', header=F,
+df_15<-fread('data\\pp-2015.csv', header=F,
              data.table=FALSE)
 colnames(df_15)<-c('ID', 'Price', 'Date', 'Postcode', 'Property', 'Age', 'Duration',
                    'PAON', 'SAON', 'Street', 'Locality', 'Town', 'District', 
                    'County', 'PPD_type', 'Record_Status')
 
-df_16<-fread('pp-2016.csv', header=F,
+df_16<-fread('data\\pp-2016.csv', header=F,
              data.table=FALSE)
 colnames(df_16)<-c('ID', 'Price', 'Date', 'Postcode', 'Property', 'Age', 'Duration',
                    'PAON', 'SAON', 'Street', 'Locality', 'Town', 'District', 
                    'County', 'PPD_type', 'Record_Status')
 
-df_17_1<-fread('pp-2017-part1.csv', header=F,
+df_17_1<-fread('data\\pp-2017-part1.csv', header=F,
                data.table=FALSE)
 colnames(df_17_1)<-c('ID', 'Price', 'Date', 'Postcode', 'Property', 'Age', 'Duration',
                      'PAON', 'SAON', 'Street', 'Locality', 'Town', 'District', 
                      'County', 'PPD_type', 'Record_Status')
 
-df_17_2<-fread('pp-2017-part2.csv', header=F,
+df_17_2<-fread('data\\pp-2017-part2.csv', header=F,
                data.table=FALSE)
 colnames(df_17_2)<-c('ID', 'Price', 'Date', 'Postcode', 'Property', 'Age', 'Duration',
                      'PAON', 'SAON', 'Street', 'Locality', 'Town', 'District', 
                      'County', 'PPD_type', 'Record_Status')
 
-df_18_1<-fread('pp-2018-part1.csv', header=F,
+df_18_1<-fread('data\\pp-2018-part1.csv', header=F,
                data.table=FALSE)
 colnames(df_18_1)<-c('ID', 'Price', 'Date', 'Postcode', 'Property', 'Age', 'Duration',
                      'PAON', 'SAON', 'Street', 'Locality', 'Town', 'District', 
                      'County', 'PPD_type', 'Record_Status')
 
-df_18_2<-fread('pp-2018-part2.csv', header=F,
+df_18_2<-fread('data\\pp-2018-part2.csv', header=F,
                data.table=FALSE)
 colnames(df_18_2)<-c('ID', 'Price', 'Date', 'Postcode', 'Property', 'Age', 'Duration',
                      'PAON', 'SAON', 'Street', 'Locality', 'Town', 'District', 
                      'County', 'PPD_type', 'Record_Status')
 
-df_19<-fread('pp-2019.csv', header=F,
+df_19<-fread('data\\pp-2019.csv', header=F,
              data.table=FALSE)
 colnames(df_19)<-c('ID', 'Price', 'Date', 'Postcode', 'Property', 'Age', 'Duration',
                    'PAON', 'SAON', 'Street', 'Locality', 'Town', 'District', 
@@ -100,19 +108,19 @@ nrow(price_data)
 head(price_data)
 
 # We save the price data frame as the price_data.csv file
-##fwrite(price_data, 'D:\\price_data.csv')
+fwrite(price_data, 'data\\price_data.csv')
 
 
 ## EPC Dataset ##
 
-price_data<-fread('price_data.csv', header = T, 
+price_data<-fread('data\\price_data.csv', header = T, 
                   data.table=FALSE)
 head(price_data)
 
 # In order to solve the problem of the large EPC register 
-# (consisting of 340 csv files totalling 16.1 GB), 
+# (consisting of 340 csv files of total size 16.1 GB), 
 # we upload the files in R in batches of 68 files per data frame 
-# (resulting in five data frames), 
+# (resulting in five data frames),
 # keeping only those rows corresponding to the Postcodes found in the price dataset,
 # and with dates prior to 2020, since the project focuses on the period 2015-2019.
 # We then save the five data frames as five separate csv files.
@@ -123,7 +131,7 @@ head(price_data)
 # and are sourced from https://epc.opendatacommunities.org/,
 # we produce a list containing the names of files in the directory
 # that holds the 340 energy performance certificates.
-file_names<-list.files("D:\\EPC", full.names = TRUE)
+file_names<-list.files("data\\EPC", full.names = TRUE)
 
 file_names<-paste(file_names, 'certificates.csv', sep='\\')
 
@@ -137,7 +145,7 @@ for(i in 1:length(names1)){
 }
 
 data1 <- rbindlist(df)
-##fwrite(data1, 'D:\\epc_data1.csv')
+fwrite(data1, 'data\\epc_data1.csv')
 
 rm(df,data1,names1)
 
@@ -150,7 +158,7 @@ for(i in 1:length(names1)){
 }
 
 data1 <- rbindlist(df)
-##fwrite(data1, 'D:\\epc_data2.csv')
+fwrite(data1, 'data\\epc_data2.csv')
 
 rm(df,data1,names1)
 
@@ -163,7 +171,7 @@ for(i in 1:length(names1)){
 }
 
 data1 <- rbindlist(df)
-##fwrite(data1, 'D:\\epc_data3.csv')
+fwrite(data1, 'data\\epc_data3.csv')
 
 rm(df,data1,names1)
 
@@ -176,7 +184,7 @@ for(i in 1:length(names1)){
 }
 
 data1 <- rbindlist(df)
-##fwrite(data1, 'D:\\epc_data4.csv')
+fwrite(data1, 'data\\epc_data4.csv')
 
 rm(df,data1,names1)
 
@@ -189,12 +197,12 @@ for(i in 1:length(names1)){
 }
 
 data1 <- rbindlist(df)
-#fwrite(data1, 'D:\\epc_data5.csv')
+fwrite(data1, 'data\\epc_data5.csv')
 
 
 # We then upload the five different csv files, and for each data frame 
 # we keep a subset of the columns.
-epc_1<-fread('epc_data1.csv', header = T, 
+epc_1<-fread('data\\epc_data1.csv', header = T, 
              data.table=FALSE)
 epc_1<-select(epc_1, c(LMK_KEY, ADDRESS1, ADDRESS2, ADDRESS3, POSTTOWN, POSTCODE, 
                        INSPECTION_DATE, LODGEMENT_DATE, TRANSACTION_TYPE,
@@ -209,7 +217,7 @@ epc_1<-select(epc_1, c(LMK_KEY, ADDRESS1, ADDRESS2, ADDRESS3, POSTTOWN, POSTCODE
 # and the EPC dataset.
 epc_1$ADDRESS<-gsub(",","", toupper(epc_1$ADDRESS))
 
-epc_2<-fread('epc_data2.csv', header = T, 
+epc_2<-fread('data\\epc_data2.csv', header = T, 
              data.table=FALSE)
 epc_2<-select(epc_2, c(LMK_KEY, ADDRESS1, ADDRESS2, ADDRESS3, POSTTOWN, POSTCODE, 
                        INSPECTION_DATE, LODGEMENT_DATE, TRANSACTION_TYPE,
@@ -220,7 +228,7 @@ epc_2<-select(epc_2, c(LMK_KEY, ADDRESS1, ADDRESS2, ADDRESS3, POSTTOWN, POSTCODE
                        LOCAL_AUTHORITY, CONSTITUENCY))
 epc_2$ADDRESS<-gsub(",","", toupper(epc_2$ADDRESS))
 
-epc_3<-fread('epc_data3.csv', header = T, 
+epc_3<-fread('data\\epc_data3.csv', header = T, 
              data.table=FALSE)
 epc_3<-select(epc_3, c(LMK_KEY, ADDRESS1, ADDRESS2, ADDRESS3, POSTTOWN, POSTCODE, 
                        INSPECTION_DATE, LODGEMENT_DATE, TRANSACTION_TYPE,
@@ -231,7 +239,7 @@ epc_3<-select(epc_3, c(LMK_KEY, ADDRESS1, ADDRESS2, ADDRESS3, POSTTOWN, POSTCODE
                        LOCAL_AUTHORITY, CONSTITUENCY))
 epc_3$ADDRESS<-gsub(",","", toupper(epc_3$ADDRESS))
 
-epc_4<-fread('epc_data4.csv', header = T, 
+epc_4<-fread('data\\epc_data4.csv', header = T, 
              data.table=FALSE)
 epc_4<-select(epc_4, c(LMK_KEY, ADDRESS1, ADDRESS2, ADDRESS3, POSTTOWN, POSTCODE, 
                        INSPECTION_DATE, LODGEMENT_DATE, TRANSACTION_TYPE,
@@ -242,7 +250,7 @@ epc_4<-select(epc_4, c(LMK_KEY, ADDRESS1, ADDRESS2, ADDRESS3, POSTTOWN, POSTCODE
                        LOCAL_AUTHORITY, CONSTITUENCY))
 epc_4$ADDRESS<-gsub(",","", toupper(epc_4$ADDRESS))
 
-epc_5<-fread('epc_data5.csv', header = T, 
+epc_5<-fread('data\\epc_data5.csv', header = T, 
              data.table=FALSE)
 epc_5<-select(epc_5, c(LMK_KEY, ADDRESS1, ADDRESS2, ADDRESS3, POSTTOWN, POSTCODE, 
                        INSPECTION_DATE, LODGEMENT_DATE, TRANSACTION_TYPE,
@@ -257,5 +265,5 @@ epc_5$ADDRESS<-gsub(",","", toupper(epc_5$ADDRESS))
 # and save it as the epc_data.csv file.
 l<-list(epc_1, epc_2, epc_3, epc_4, epc_5)
 epc_data<-rbindlist(l)
-#fwrite(epc_data, 'D:\\epc_data.csv')
+fwrite(epc_data, 'data\\epc_data.csv')
 
