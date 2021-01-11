@@ -1,3 +1,8 @@
+# This R script can be used to replicate the data merging process
+# for the paper "Climate Policy and Transition Risk in the Housing Market"
+# by Konstantinos Ferentinos & Alex Gibberd & Benjamin Guin.
+# The code was developed by Konstantinos Ferentinos.
+
 library(dplyr)
 library(plyr)
 library(readr)
@@ -6,11 +11,19 @@ library(data.table)
 
 ## Data Merging ##
 
-price_data<-fread('D:\\Data Files\\Main Analysis Data Files\\price_data.csv', header = T, 
+# In order to make the R code portable,
+# whenever I intend to import or save data in a CSV format
+# I define a variable with the name 'my_path' early in each R script 
+# that stores the path to each CSV file that is used in the code.
+# That way each user of the code can easily change the path at will,
+# thus improving its reproducibility.
+my_path<-'data\\'
+
+price_data<-fread(paste(my_path, 'price_data.csv', sep='\\'), header = T, 
                   data.table=FALSE)
 head(price_data)
 
-epc_data<-fread('D:\\Data Files\\Main Analysis Data Files\\epc_data.csv', header = T, 
+epc_data<-fread(paste(my_path, 'epc_data.csv', sep='\\'), header = T, 
                 data.table=FALSE)
 head(epc_data)
 
@@ -96,24 +109,24 @@ length(unique(res$ID))
 
 # We save all the transactions that had both prior 
 # and posterior registered EPC ratings.
-df.g<-res %>% group_by(ID) %>% filter(any(Prior=='No') & any(Prior=='Yes'))
+df_heterogeneous<-res %>% group_by(ID) %>% filter(any(Prior=='No') & any(Prior=='Yes'))
 
 # Then we save all the transactions that have homogeneous registered EPC ratings 
 # (i.e. either all prior registered EPC ratings or all posterior registered EPC ratings).
-df.h<-res %>% group_by(ID) %>% filter(all(Prior=='No') | all(Prior=='Yes'))
+df_homogeneous<-res %>% group_by(ID) %>% filter(all(Prior=='No') | all(Prior=='Yes'))
 
 # For the transactions that had both prior and posterior registered EPC ratings, 
 # I kept only the rows with the prior registered ones, 
 # and for each transaction extracted with the slice() function the closest one.
-df.g<-df.g %>% filter(Prior=='Yes') %>% slice(which.min(Distance))
+df_heterogeneous<-df_heterogeneous %>% filter(Prior=='Yes') %>% slice(which.min(Distance))
 
 # As for the transactions that had either all prior registered EPC ratings 
 # or all posterior registered EPC ratings,
 # I just took the closest registered EPC rating.
-df.h<-df.h %>% slice(which.min(Distance))
+df_homogeneous<-df_homogeneous %>% slice(which.min(Distance))
 
 # Then we bind the rows of the two data frames.
-l <- list(df.g, df.h)
+l <- list(df_heterogeneous, df_homogeneous)
 df<-rbindlist(l)
 df<-as.data.frame(df)
 
@@ -122,8 +135,8 @@ head(df)
 # We then remove the properties that had duplicated sales values
 # i.e. multiple rows of a transaction of the same property
 # at the same date with the same price, albeit with a different ID number due to a
-# transcription error in the original Price Paid Data that were sourced from the HM
-# Land Registry website.
+# transcription error in the original Price Paid Data that were sourced 
+# from the HM Land Registry website.
 # We also remove the properties with INVALID! values in their EPC ratings.
 '%notin%'<-Negate('%in%')
 
@@ -141,7 +154,7 @@ df<-df %>% filter(ADDRESS!=unique(df$ADDRESS[df$CURRENT_ENERGY_RATING=='INVALID!
 head(df)
 dim(df)
 
-rm(res, df.g, df.h, dupes, l, unique_df)
+rm(res, df_heterogeneous, df_homogeneous, dupes, l, unique_df)
 
 # I followed the same procedure for 'res1', 
 # which is the result of the inner_join() function 
@@ -166,14 +179,14 @@ res1<-mutate(res1, Distance = abs(as.numeric(difftime(Date, INSPECTION_DATE, uni
 
 length(unique(res1$ID))
 
-missing1<-res1 %>% group_by(ID) %>% filter(any(Prior=='No') & any(Prior=='Yes'))
+df_heterogeneous1<-res1 %>% group_by(ID) %>% filter(any(Prior=='No') & any(Prior=='Yes'))
 
-missing2<-res1 %>% group_by(ID) %>% filter(all(Prior=='No') | all(Prior=='Yes'))
+df_homogeneous1<-res1 %>% group_by(ID) %>% filter(all(Prior=='No') | all(Prior=='Yes'))
 
-missing1<-missing1 %>% filter(Prior=='Yes') %>% slice(which.min(Distance))
-missing2<-missing2 %>% slice(which.min(Distance))
+df_heterogeneous1<-df_heterogeneous1 %>% filter(Prior=='Yes') %>% slice(which.min(Distance))
+df_homogeneous1<-df_homogeneous1 %>% slice(which.min(Distance))
 
-l1 <- list(missing1, missing2)
+l1 <- list(df_heterogeneous1, df_homogeneous1)
 df1<-rbindlist(l1)
 df1<-as.data.frame(df1)
 
@@ -202,7 +215,7 @@ head(df)
 head(df1)
 df1<-df1[,c(1:11,18,12:17,19:30)]
 
-rm(dupes, l1, missing1, missing2, point_ref1, res1, unique_df1)
+rm(dupes, l1, df_heterogeneous1, df_homogeneous1, point_ref1, res1, unique_df1)
 
 # We merge the two resulting data frames into a single one.
 l <- list(df, df1)
@@ -213,5 +226,5 @@ sum(duplicated(data$ID))
 head(data)
 dim(data)
 
-#fwrite(data, 'D:\\initial_data.csv')
+fwrite(data, paste(my_path, 'initial_data.csv', sep='\\'))
 
