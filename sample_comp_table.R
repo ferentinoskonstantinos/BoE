@@ -1,3 +1,8 @@
+# This R script can be used to replicate the results of Table 11
+# for the paper "Climate Policy and Transition Risk in the Housing Market"
+# by Konstantinos Ferentinos & Alex Gibberd & Benjamin Guin.
+# The code was developed by Konstantinos Ferentinos.
+
 library(dplyr)
 library(plyr)
 library(readr)
@@ -10,7 +15,15 @@ library(Information)
 library(tableone)
 library(knitr)
 
-data1<-fread('D:\\repeated_sales.csv', header = T, 
+# In order to make the R code portable,
+# whenever I intend to import or save data in a CSV format
+# I define a variable with the name 'my_path' early in each R script 
+# that stores the path to each CSV file that is used in the code.
+# That way each user of the code can easily change the path at will,
+# thus improving its reproducibility.
+my_path<-'data\\'
+
+data1<-fread(paste(my_path, 'repeated_sales.csv', sep='\\'), header = T, 
              data.table=FALSE)
 head(data1)
 dim(data1)
@@ -36,7 +49,7 @@ levels(data1$CONSTRUCTION_AGE_BAND)[4:5]<-"1996-2006"
 
 rm(cols)
 
-data2<-fread('D:\\random_sample.csv', header = T, 
+data2<-fread(paste(my_path, 'random_sample.csv', sep='\\'), header = T, 
              data.table=FALSE)
 head(data2)
 dim(data2)
@@ -63,12 +76,15 @@ levels(data2$CONSTRUCTION_AGE_BAND)[4:5]<-"1996-2006"
 colnames(data1)
 colnames(data2)
 
+# We merge the two datasets in order to compare them
+# using the tableone package.
 l<-list(data1, data2)
 epc_data<-rbindlist(l)
 epc_data<-as.data.frame(epc_data)
 head(epc_data)
 
-# Summary of balance for the two datasets
+# Summary of balance for the two datasets,
+# as shown in Table 11 of the paper.
 xvars <- colnames(epc_data)[c(7,8,10,11,15,16,18)]
 table1 <- CreateTableOne(vars = xvars, strata = "Dataset", data = epc_data, test = FALSE)
 print(table1, smd = TRUE)
