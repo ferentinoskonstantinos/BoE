@@ -59,7 +59,6 @@ head(data)
 levels(data$EPC_LEVEL)<-c('Above E', 'Below E')
 data$EPC_LEVEL <- relevel(data$EPC_LEVEL, ref="Below E")
 
-
 # GAM with ordered-factor-smooth interactions
 
 # We treat EPC_LEVEL as an ordered factor
