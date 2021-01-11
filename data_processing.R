@@ -1,3 +1,8 @@
+# This R script can be used to replicate the feature engineering process
+# for the paper "Climate Policy and Transition Risk in the Housing Market"
+# by Konstantinos Ferentinos & Alex Gibberd & Benjamin Guin.
+# The code was developed by Konstantinos Ferentinos.
+
 library(dplyr)
 library(plyr)
 library(readr)
@@ -11,7 +16,15 @@ library(cowplot)
 
 ## Data Processing ##
 
-data<-fread('D:\\initial_data.csv', header = T, 
+# In order to make the R code portable,
+# whenever I intend to import or save data in a CSV format
+# I define a variable with the name 'my_path' early in each R script 
+# that stores the path to each CSV file that is used in the code.
+# That way each user of the code can easily change the path at will,
+# thus improving its reproducibility.
+my_path<-'data\\'
+
+data<-fread(paste(my_path, 'initial_data.csv', sep='\\'), header = T, 
             data.table=FALSE)
 head(data)
 dim(data)
@@ -52,14 +65,33 @@ head(select(data, c(CURRENT_ENERGY_RATING, EPC_LEVEL)))
 
 rm(res, test, unique_ID)
 
-# Next, the postcode of each property in the merged dataset 
+# We add information on geodemographic classifications in England and Wales, 
+# that have been produced following the 2011 census.
+# The file that is available for download from 
+# https://geoportal.statistics.gov.uk/datasets/be648a095a9745998f6961e5ba54e01c_0
+# contains the Output Area Classifications (OACs) in their December 2011 format, 
+# that partition these areas into distinct groups.
+# In particular, the 2011 population census data have been used to group output areas 
+# based on socio-economic information, including employment, education, income, 
+# and other demographic variables of the population which they contain, 
+# thus providing a set of hierarchical clusters, 
+# consisting of three tiers of Supergroups, Groups, and Subgroups, 
+# that summarize the social and economic structure of UK neighborhoods.
+# The 2011 OAC codes range from 1a1 to 8d3, and for the analysis in the paper, 
+# the 8 Supergroup clusters that form the top tier of the hierarchy, 
+# and are denoted by the first number of the 2011 OAC code, ranging from 1 to 8,
+# will be added as a feature in the merged dataset.
+
+# As a first step, the postcode of each property in the merged dataset 
 # is matched with the corresponding 2011 OAC code, which ranges from 1a1 to 8d3.
 # This was achieved, by downloading the ONS Postcode Directory (ONSPD) for the
 # United Kingdom in its May 2020 format, 
-# from https://geoportal.statistics.gov.uk/datasets/ons-postcode-directory-may-2020,
+# from https://geoportal.statistics.gov.uk/datasets/ons-postcode-directory-may-2020.
+# The file we use is the ONSPD_MAY_2020_UK CSV file,
+# that can be found in the Data folder of the downloaded and unzipped ONSPD file,
 # which relates both current and terminated UK postcodes 
 # to a range of current area geographies, among them the 2011 OAC codes.
-codes<-fread('D:\\ONSPD_MAY_2020_UK.csv', header = T, 
+codes<-fread(paste(my_path, 'ONSPD\\Data\\ONSPD_MAY_2020_UK.csv', sep='\\'), header = T, 
              data.table=FALSE)
 head(codes)
 dim(codes)
@@ -76,12 +108,12 @@ res<-select(res, -pcd)
 
 # We save the data frame with the added feature of the 2011 OAC codes,
 # as the 'initial_data1.csv' file.
-#fwrite(res, 'D:\\initial_data1.csv')
+fwrite(res, paste(my_path, 'initial_data1.csv', sep='\\'))
 
 rm(codes, data, res)
 
 # We start with checking for outliers in the Price variable.
-data<-fread('D:\\initial_data1.csv', header = T, 
+data<-fread(paste(my_path, 'initial_data1.csv', sep='\\'), header = T, 
             data.table=FALSE)
 head(data)
 dim(data)
@@ -124,13 +156,15 @@ nrow(trimmed_data)
 head(trimmed_data)
 
 # We save the trimmed dataset as a csv file.
-#fwrite(trimmed_data, 'D:\\trimmed_data.csv')
+fwrite(trimmed_data, paste(my_path, 'trimmed_data.csv', sep='\\'))
 
 # The trimming of the data based on the percentiles of the Price variable, 
 # has mitigated the issue of the outliers.
 describe(data$Price)
 describe(trimmed_data$Price)
 
+# We construct a histogram and a density plot of the Price variable,
+# that corresponds to Figure 1 of the paper.
 ggplot(trimmed_data, aes(x=Price/1000)) + 
   geom_histogram(aes(y=..density..), col="black", fill="white", bins=15)+
   geom_density(alpha=.4, fill="#17406A") +
@@ -148,8 +182,11 @@ ggplot(trimmed_data, aes(x=Price/1000)) +
 
 rm(data, res, test, trimmed, trimmed_data, unique_ID)
 
-# We add the Supergroup cluster names as a column in the trimmed dataset.
-data<-fread('D:\\trimmed_data.csv', header = T, 
+# Next, the dataset that holds the three tiers of OAC clusters 
+# and can be sourced from https://geoportal.statistics.gov.uk/datasets/be648a095a9745998f6961e5ba54e01c_0
+# is used to match each 2011 OAC code in our sample with the 8 Supergroup cluster names, 
+# and added as a feature with the name Group1, in our trimmed merged dataset.
+data<-fread(paste(my_path, 'trimmed_data.csv', sep='\\'), header = T, 
             data.table=FALSE)
 head(data)
 dim(data)
@@ -157,10 +194,7 @@ dim(data)
 data$Date<-ymd(data$Date)
 class(data$Date)
 
-# Output Area Classifications in their December 2011 format 
-# were sourced from the Open Geography Portal
-# https://geoportal.statistics.gov.uk/datasets/be648a095a9745998f6961e5ba54e01c_0.
-oac11_data<-fread('D:\\Output_Area_Classification__December_2011__in_the_United_Kingdom.csv', header = T, 
+oac11_data<-fread(paste(my_path, 'Output_Area_Classification__December_2011__in_the_United_Kingdom.csv', sep='\\'), header = T, 
                   data.table=FALSE)
 head(oac11_data)
 dim(oac11_data)
@@ -171,7 +205,6 @@ oac11_data$oac11<-trimws(sub(":.*", "", oac11_data$Subgroup))
 oac11_data<-select(oac11_data, c(Group1, oac11))
 
 # The dataset that holds the three tiers of OAC clusters 
-# and can be sourced from the Open Geography Portal, 
 # is used to match each 2011 OAC code in the trimmed dataset 
 # with the 8 Supergroup cluster names.
 res<-inner_join(data, oac11_data, by='oac11')
@@ -181,12 +214,24 @@ head(res)
 # which corresponds to the NUTS Level 1 regions of the UK, 
 # by matching the LOCAL_AUTHORITY variable of our combined dataset 
 # with the corresponding NUTS Level 1 name.
+# The NUTS system is used for referencing the current administrative 
+# and electoral areas of the UK for statistical purposes. 
+# The NUTS Levels 1, 2, and 3 all stay fixed for a minimum of three years, 
+# with Level 1 referencing the regions, Level 2 the counties and grouped London boroughs, 
+# and Level 3 the unitary authorities and districts in the UK.
+# The NUTS Levels 4 and 5, are called 
+# local administrative units (LAU) Levels 1 and 2 respectively, 
+# with Level 1 referencing the local authority areas, and Level 2 the wards.
+# Hence, the LOCAL_AUTHORITY variable of our combined dataset 
+# corresponds to the LAU Level 1 code, and this is why it is used as the link 
+# to match each property with the region in which it is is located.
 colnames(res)[20]<-'LAU118CD'
 
-# We use a CSV file found in the CSV Collection of the ONSPD in
-# its May 2020 format, that relates the LAU codes and names to the NUTS codes and names, 
+# The file we use is the LAU218_LAU118_NUTS318_NUTS218_NUTS118_UK_LU CSV file,
+# that can be found in the Documents folder of the downloaded and unzipped ONSPD file,
+# that relates the LAU codes and names to the NUTS codes and names, 
 # in their 2018 format.
-codes<-fread('D:\\LAU218_LAU118_NUTS318_NUTS218_NUTS118_UK_LU.csv', header = T, 
+codes<-fread(paste(my_path, 'ONSPD\\Documents\\LAU218_LAU118_NUTS318_NUTS218_NUTS118_UK_LU.csv', sep='\\'), header = T, 
              data.table=FALSE)
 head(codes)
 dim(codes)
@@ -204,7 +249,8 @@ head(data1)
 
 rm(codes,data,oac11_data,res,test)
 
-# We proceed with removing missing values.
+# We proceed with removing missing values,
+# indicated either as 'NA', '', 'NO DATA!', 'unknown', or 'INVALID'.
 cols <- colnames(data1)[c(18,19)]
 
 data1[cols] <- lapply(data1[cols], factor)
@@ -249,4 +295,4 @@ head(data1)
 
 # We save the final version of our merged panel dataset,
 # as a csv file.
-#fwrite(data1, 'D:\\processed_final_data.csv')
+fwrite(data1, paste(my_path, 'processed_final_data.csv', sep='\\'))
