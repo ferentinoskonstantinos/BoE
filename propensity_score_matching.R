@@ -1,3 +1,8 @@
+# This R script can be used to replicate the Propensity Score Matching analysis
+# for the paper "Climate Policy and Transition Risk in the Housing Market"
+# by Konstantinos Ferentinos & Alex Gibberd & Benjamin Guin.
+# The code was developed by Konstantinos Ferentinos.
+
 library(dplyr)
 library(plyr)
 library(readr)
@@ -18,7 +23,15 @@ library(randomForest)
 
 ## Propensity Score Matching ##
 
-data<-fread('D:\\processed_final_data.csv', header = T, 
+# In order to make the R code portable,
+# whenever I intend to import or save data in a CSV format
+# I define a variable with the name 'my_path' early in each R script 
+# that stores the path to each CSV file that is used in the code.
+# That way each user of the code can easily change the path at will,
+# thus improving its reproducibility.
+my_path<-'data\\'
+
+data<-fread(paste(my_path, 'processed_final_data.csv', sep='\\'), header = T, 
             data.table=FALSE)
 head(data)
 dim(data)
@@ -41,8 +54,16 @@ levels(data$CONSTRUCTION_AGE_BAND)[2:3]<-"1930-1966"
 levels(data$CONSTRUCTION_AGE_BAND)[3:6]<-"1967-1995"
 levels(data$CONSTRUCTION_AGE_BAND)[4:5]<-"1996-2006"
 
-# We focus on the properties prior to the intervention date, 
-# and if there multiple rows, we take the one that is closest to 01/04/2018.
+# Prior to verifying, using pre-intervention data, 
+# whether the price trends are the same before the 2018 MEES initiative came into force, 
+# a necessary assumption for the validity of the DiD analysis,
+# it is wise to first re-balance the two groups
+# and increase the comparability of the treated and non-treated properties 
+# that are plagued by selection bias.
+# In order to implement the PSM method on our sample, 
+# we focus on the properties prior to the 2018 MEES intervention date.
+# Given that PSM does not work with panel data, 
+# if there multiple rows, we take the one that is closest to the intervention date.
 data_prior<-data %>% filter(Date < ymd("2018-04-01"))
 head(data_prior)
 
@@ -56,14 +77,21 @@ head(res)
 nrow(res)
 
 # Propensity score estimation
+
+# We follow a corrective approach with respect to propensity scores estimation, 
+# by recognizing the limitations of blindly applying logistic regression, 
+# and suggesting the implementation of more flexible machine-learning classifiers 
+# that can improve the quality of the matched dataset.
 head(res)
 res<-mutate(res, Class = ifelse(EPC_LEVEL=='Below E', 1, 0))
 
-# Summary of balance for all data before matching
+# Summary of balance for all data before matching,
+# as shown in Table 1 of the paper.
 xvars <- colnames(res)[c(15,16,18,19,24:26)]
 table1 <- CreateTableOne(vars = xvars, strata = "EPC_LEVEL", data = res, test = FALSE)
 print(table1, smd = TRUE)
 
+# We replicate the column 'Unmatched' of Table 4 of the paper.
 pre_PSM<-as.data.frame(ExtractSmd(table1))
 colnames(pre_PSM)<-"SMD"
 pre_PSM$Variables<-rownames(pre_PSM)
@@ -72,6 +100,8 @@ pre_PSM$SMD<-round(pre_PSM$SMD, 3)
 sum(pre_PSM$SMD)
 rm(pre_PSM)
 
+# In order to resolve the issue of zero variation in the category 'Park home' 
+# for the PROPERTY_TYPE variable, we delete this row.
 res<-filter(res, PROPERTY_TYPE!='Park home')
 nrow(res)
 
@@ -188,7 +218,8 @@ plot(my_roc_boost)
 
 auc(my_roc_boost)
 
-# Now, we plot the ROC curve for each of the fitted classifiers.
+# Now, we plot the ROC curve for each of the fitted classifiers,
+# as shown in Figure 8b of the paper.
 ggroc(list(log=my_roc_glm, rf=my_roc_rf, xgboost=my_roc_boost), legacy.axes=TRUE, size = 1) +
   geom_abline(intercept = 0, slope = 1,
               color = "black", linetype = "dashed") +
@@ -243,12 +274,16 @@ m.out <- matchit(Class ~ PROPERTY_TYPE+TOTAL_FLOOR_AREA+CONSTRUCTION_AGE_BAND+TE
                  method="nearest", distance=res$PScores)
 
 summary(m.out)
+
+# We construct the histograms of propensity scores before and after matching,
+# as shown in Figure 8a of the paper.
 plot(m.out, type="hist", cex.lab=1.5, cex.axis=1.5, cex.main=1.5, col='#17406A')
 
 # We create a dataframe containing only the matched observations.
 dta_nearest1 <- match.data(m.out)
 dim(dta_nearest1)
 
+# We replicate Table 5 of the paper.
 table_match_nearest1 <- CreateTableOne(vars = xvars, strata = "EPC_LEVEL", 
                                        data = dta_nearest1, test = FALSE)
 print(table_match_nearest1, smd = TRUE)
@@ -259,9 +294,9 @@ all(dta_nearest1$Date < "2018-04-01")
 
 # We save the PSM-derived matched dataset,
 # as a csv file.
-#fwrite(dta_nearest1, 'D:\\psm_data_main.csv')
+fwrite(dta_nearest1, paste(my_path, 'psm_data_main.csv', sep='\\'))
 
-# We reproduce the column 'PSM Logistic' of Table 4 on pg. 13 of the paper.
+# We replicate the column 'PSM Logistic' of Table 4 of the paper.
 set.seed(1000)
 m.out_logit <- matchit(Class ~ PROPERTY_TYPE+TOTAL_FLOOR_AREA+CONSTRUCTION_AGE_BAND+TENURE+
                          Group1+NUTS118NM+NUMBER_HABITABLE_ROOMS_grouped, data=res, 
