@@ -63,7 +63,6 @@ ggplot(EPC_intervention, aes(fill=Period, y=Proportion, x=EPC)) +
         legend.position="bottom",
         legend.background = element_rect(linetype="solid", colour ="black"))
 
-
 # Barplot of the average transaction price by EPC ratings 
 # before and after the MEES 2018 policy intervention,
 # that corresponds to Figure 3b of the paper.
@@ -87,7 +86,6 @@ ggplot(data, aes(x=CURRENT_ENERGY_RATING, y=Price/1000, fill=Period)) +
         legend.position="bottom",
         legend.background = element_rect(linetype="solid", colour ="black"))
 
-
 # Density plot for Price variable,
 # as shown in Figure 4a of the paper.
 ggplot(filter(data, 
@@ -109,7 +107,6 @@ ggplot(filter(data,
         legend.position="bottom",
         legend.background = element_rect(linetype="solid", colour ="black"))
 
-
 # Density plot for Price variable,
 # as shown in Figure 4c of the paper.
 ggplot(filter(data, 
@@ -130,7 +127,6 @@ ggplot(filter(data,
         legend.text=element_text(size=20),
         legend.position="bottom",
         legend.background = element_rect(linetype="solid", colour ="black"))
-
 
 table(data$EPC_LEVEL)
 prop.table(table(data$EPC_LEVEL))
