@@ -107,8 +107,8 @@ res<-mutate(res, Distance = abs(as.numeric(difftime(Date, INSPECTION_DATE, unit=
 
 length(unique(res$ID))
 
-# We save all the transactions that had both prior 
-# and posterior registered EPC ratings.
+# We save all the transactions that have heterogeneous registered EPC ratings 
+# (i.e. both prior and posterior registered EPC ratings).
 df_heterogeneous<-res %>% group_by(ID) %>% filter(any(Prior=='No') & any(Prior=='Yes'))
 
 # Then we save all the transactions that have homogeneous registered EPC ratings 
