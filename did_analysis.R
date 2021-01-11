@@ -1,3 +1,8 @@
+# This R script can be used to replicate the DiD analysis
+# for the paper "Climate Policy and Transition Risk in the Housing Market"
+# by Konstantinos Ferentinos & Alex Gibberd & Benjamin Guin.
+# The code was developed by Konstantinos Ferentinos.
+
 library(dplyr)
 library(plyr)
 library(readr)
@@ -11,10 +16,17 @@ library(cowplot)
 library(lmtest)
 library(plm)
 library(moments)
+library(reldist)
 
-## Estimation of the Intervention Effect via the Difference-in-Difference Model ##
+# In order to make the R code portable,
+# whenever I intend to import or save data in a CSV format
+# I define a variable with the name 'my_path' early in each R script 
+# that stores the path to each CSV file that is used in the code.
+# That way each user of the code can easily change the path at will,
+# thus improving its reproducibility.
+my_path<-'data\\'
 
-data<-fread('D:\\processed_final_data.csv', header = T, 
+data<-fread(paste(my_path, 'processed_final_data.csv', sep='\\'), header = T, 
             data.table=FALSE)
 head(data)
 dim(data)
@@ -40,7 +52,7 @@ levels(data$CONSTRUCTION_AGE_BAND)[4:5]<-"1996-2006"
 
 
 # We upload the PSM-derived matched dataset.
-psm_data<-fread('D:\\psm_data_main.csv', header = T, 
+psm_data<-fread(paste(my_path, 'psm_data_main.csv', sep='\\'), header = T, 
                 data.table=FALSE)
 head(psm_data)
 dim(psm_data)
@@ -79,8 +91,9 @@ head(did_data)
 
 rm(data, psm_data, res, unique_ID)
 
-# Density plots for Figure 4 of the paper
 
+# Density plot for Price variable,
+# as shown in Figure 4b of the paper.
 ggplot(filter(did_data, 
               Date < "2018-04-01"), aes(x=Price/1000, fill=EPC_LEVEL)) +
   geom_density(alpha=0.4) +
@@ -100,6 +113,9 @@ ggplot(filter(did_data,
         legend.position="bottom",
         legend.background = element_rect(linetype="solid", colour ="black"))
 
+
+# Density plot for Price variable,
+# as shown in Figure 4d of the paper.
 ggplot(filter(did_data, 
               Date >= "2018-04-01"), aes(x=Price/1000, fill=EPC_LEVEL)) +
   geom_density(alpha=0.4) +
@@ -160,7 +176,8 @@ head(res)
 d<-pdata.frame(res, index = c("property", "Post"), drop.index = FALSE)
 head(d)
 
-# We fit the DiD model on the full balanced panel.
+# We fit the DiD model on the full balanced panel,
+# and replicate column (1) of Table 8 of the paper.
 did_reg <- plm(Price ~ Post + D, data = d, model = "within")
 summary(did_reg)
 
@@ -180,13 +197,14 @@ d_rented<-pdata.frame(res_rented, index = c("property", "Post"), drop.index = FA
 head(d_rented)
 
 # We fit the DiD model on the sub-sample of properties 
-# that have been private rented at least once.
+# that have been private rented at least once,
+# and replicate column (2) of Table 8 of the paper.
 did_rented <- plm(Price ~ Post + D, data = d_rented, model = "within")
 summary(did_rented)
 
 coeftest(did_rented, vcov=function(x) vcovHC(x, cluster="group", type="HC1"))
 
-# QQ plots
+# We replicate the QQ-plot in Figure 9a of the paper.
 options(scipen = 999)
 df <- data.frame(y = residuals(did_reg))
 ggplot(df, aes(sample = y)) + 
@@ -202,24 +220,42 @@ ggplot(df, aes(sample = y)) +
         text = element_text(size=20),
         legend.text=element_text(size=20))
 
-options(scipen = 999)
-df <- data.frame(y = residuals(did_rented))
-ggplot(df, aes(sample = y)) + 
-  stat_qq() + stat_qq_line(size = 0.85) +
-  labs(x = "Theoretical Quantiles", y = "Sample Quantiles") +
-  theme(axis.line = element_line(colour = "black"),
-        axis.text.x = element_text(colour = "black"),
-        axis.text.y = element_text(colour = "black"),
-        panel.grid.major = element_blank(),
-        panel.grid.minor = element_blank(),
-        panel.border = element_blank(),
-        panel.background = element_blank(),
-        text = element_text(size=20),
-        legend.text=element_text(size=20))
-
-# We calculate the skewness and kurtosis values for the residuals.
+# We calculate the skewness and kurtosis values for the residuals
+# of the DiD model on the full balanced panel.
 round(skewness(residuals(did_reg)), 3)
 round(kurtosis(residuals(did_reg)), 3)
 
-round(skewness(residuals(did_rented)), 3)
-round(kurtosis(residuals(did_rented)), 3)
+# We replicate Table 10 of the paper.
+data_prior<-res %>% filter(Date < ymd("2018-04-01"))
+head(data_prior)
+
+data_post<-res %>% filter(Date >= ymd("2018-04-01"))
+head(data_post)
+
+# We calculate the Gini coefficients.
+round(gini(data_prior$Price)*100, 2)
+round(gini(data_post$Price)*100, 2)
+round(gini(filter(data_post, EPC_LEVEL=="Below E")$Price+9000)*100, 2)
+
+# We construct non-parametric 95% bootstrap confidence intervals
+# for each Gini coefficient.
+B <- 1000
+parBS1 <- NULL
+parBS2 <- NULL
+parBS3 <- NULL
+
+for(i in 1:B){
+  set.seed(i)
+  dataBS1 <- sample(data_prior$Price, length(data_prior$Price), replace=T)
+  dataBS2 <- sample(data_post$Price, length(data_post$Price), replace=T)
+  dataBS3 <- sample(filter(data_post, EPC_LEVEL=="Below E")$Price, 
+                    length(filter(data_post, EPC_LEVEL=="Below E")$Price), replace=T)
+  
+  parBS1[i] <- gini(dataBS1)
+  parBS2[i] <- gini(dataBS2)
+  parBS3[i] <- gini(dataBS3+9000)
+}
+
+c(round(quantile(parBS1,0.025), 4), round(quantile(parBS1,0.975), 4))
+c(round(quantile(parBS2,0.025), 4), round(quantile(parBS2,0.975), 4))
+c(round(quantile(parBS3,0.025), 4), round(quantile(parBS3,0.975), 4))
