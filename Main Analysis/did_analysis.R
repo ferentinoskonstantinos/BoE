@@ -91,7 +91,6 @@ head(did_data)
 
 rm(data, psm_data, res, unique_ID)
 
-
 # Density plot for Price variable,
 # as shown in Figure 4b of the paper.
 ggplot(filter(did_data, 
@@ -112,7 +111,6 @@ ggplot(filter(did_data,
         legend.text=element_text(size=20),
         legend.position="bottom",
         legend.background = element_rect(linetype="solid", colour ="black"))
-
 
 # Density plot for Price variable,
 # as shown in Figure 4d of the paper.
