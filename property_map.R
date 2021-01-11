@@ -1,3 +1,9 @@
+# This R script can be used to replicate the map of geographic regions in England and Wales
+# that shows the number of properties in our final sample
+# for the paper "Climate Policy and Transition Risk in the Housing Market"
+# by Konstantinos Ferentinos & Alex Gibberd & Benjamin Guin.
+# The code was developed by Konstantinos Ferentinos.
+
 library(maps)
 library(mapdata)
 library(maptools)
@@ -12,11 +18,18 @@ library(data.table)
 library(dplyr)
 library(lubridate)
 
+# In order to make the R code portable,
+# whenever I intend to import or save data in a CSV format
+# I define a variable with the name 'my_path' early in each R script 
+# that stores the path to each CSV file that is used in the code.
+# That way each user of the code can easily change the path at will,
+# thus improving its reproducibility.
+my_path<-'data\\'
+
 # We construct a heat map of the number of properties in our sample, 
-# that are located in each of the 10 regions of England and Wales,
 # using the online tutorial found in this link:
 # https://datatricks.co.uk/creating-maps-in-r.
-data<-fread('D:\\processed_final_data.csv', header = T, 
+data<-fread(paste(my_path, 'processed_final_data.csv', sep='\\'), header = T, 
             data.table=FALSE)
 head(data)
 dim(data)
@@ -37,7 +50,7 @@ colnames(number_NUTS)[2]<-"Total"
 
 rm(data, data_NUTS)
 
-codes<-fread('D:\\LAU218_LAU118_NUTS318_NUTS218_NUTS118_UK_LU.csv', header = T, 
+codes<-fread(paste(my_path, 'ONSPD\\Documents\\LAU218_LAU118_NUTS318_NUTS218_NUTS118_UK_LU.csv', sep='\\'), header = T, 
              data.table=FALSE)
 head(codes)
 dim(codes)
@@ -54,12 +67,16 @@ mydata
 
 rm(codes, number_NUTS, NUTS, test)
 
-# Heat map of England and Wales with the number of properties in each NUTS Level 1 Region,
-# using the shapefiles sourced from https://geoportal.statistics.gov.uk/datasets/01fd6b2d7600446d8af768005992f76a_0.
-shapefile <- readOGR(dsn="D:\\NUTS Level 1 shapefiles", 
+# We construct the heat map of England and Wales with the number of properties
+# in each NUTS Level 1 Region,
+# using the shapefiles found in the NUTS_Level_1__January_2018__Boundaries-shp.zip file,
+# which is downloaded from https://geoportal.statistics.gov.uk/datasets/01fd6b2d7600446d8af768005992f76a_0.
+# We must extract the above zip file to a folder named 'NUTS Level 1 shapefiles'
+# before uploading them in R.
+shapefile <- readOGR(dsn=paste(my_path, 'NUTS Level 1 shapefiles', sep='\\'), 
                      layer="NUTS_Level_1__January_2018__Boundaries")
 
-# We reshape the shapefiles, so as to use the ggplot2 package
+# We reshape the shapefiles, so as to use the ggplot2 package.
 mapdata <- tidy(shapefile, region="nuts118cd")
 head(mapdata)
 
@@ -73,10 +90,10 @@ mapdata<-filter(mapdata, mapdata$id%notin%c('UKM', 'UKN'))
 names(table(mapdata$id))
 names(table(mydata$id))
 
-#Join mydata with mapdata
+# We take the join of mydata with mapdata.
 df <- join(mapdata, mydata, by="id")
 
-#Create the heatmap using the ggplot2 package
+# We construct the heat map using the ggplot2 package.
 gg <- ggplot() + geom_polygon(data = df, aes(x = long, y = lat, group = group, fill = Total), color = "white", size = 0.25)
 gg <- gg + scale_fill_gradient(low = "#6790BA", high = "#00042E", na.value = "black")
 gg <- gg + coord_fixed(1)
