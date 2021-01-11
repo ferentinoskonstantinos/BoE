@@ -1,3 +1,9 @@
+# This R script can be used to replicate the GAM analysis
+# for the sensitivity analysis that trims at the 5th and 95th percentile of prices
+# for the paper "Climate Policy and Transition Risk in the Housing Market"
+# by Konstantinos Ferentinos & Alex Gibberd & Benjamin Guin.
+# The code was developed by Konstantinos Ferentinos.
+
 library(dplyr)
 library(plyr)
 library(readr)
@@ -9,9 +15,15 @@ library(ggpubr)
 library(mgcv)
 library(mgcViz)
 
-## Examining Pre-intervention Price Trends via Generalized Additive Models ##
+# In order to make the R code portable,
+# whenever I intend to import or save data in a CSV format
+# I define a variable with the name 'my_path' early in each R script 
+# that stores the path to each CSV file that is used in the code.
+# That way each user of the code can easily change the path at will,
+# thus improving its reproducibility.
+my_path<-'data\\'
 
-data<-fread('D:\\5pc_psm_data.csv', header = T, 
+data<-fread(paste(my_path, '5pc_psm_data.csv', sep='\\'), header = T, 
             data.table=FALSE)
 head(data)
 dim(data)
