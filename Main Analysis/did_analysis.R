@@ -181,6 +181,7 @@ head(d)
 did_reg <- plm(Price ~ Post + D, data = d, model = "within")
 summary(did_reg)
 
+# We replicate column (1) of Table 15 of the paper.
 coeftest(did_reg, vcov=function(x) vcovHC(x, cluster="group", type="HC1"))
 
 # We focus on the sub-sample of properties 
@@ -202,6 +203,7 @@ head(d_rented)
 did_rented <- plm(Price ~ Post + D, data = d_rented, model = "within")
 summary(did_rented)
 
+# We replicate column (2) of Table 15 of the paper.
 coeftest(did_rented, vcov=function(x) vcovHC(x, cluster="group", type="HC1"))
 
 # We replicate the QQ-plot in Figure 9a of the paper.
