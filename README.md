@@ -8,7 +8,7 @@ that is to be published in the Bank of England Staff Working Paper Series.
 
 There are five open data sources that need to be accessed in order to replicate the results of the paper.
 
-### 1. Data on property transactions
+### 1. Data on Property Transactions
 
 The first open data source consists of Price Paid Data collected across England and Wales, that are sourced from the HM Land Registry website: <https://www.gov.uk/government/statistical-data-sets/price-paid-data-downloads#yearly-file> and <https://data.gov.uk/dataset/314f77b3-e702-4545-8bcb-9ef8262ea0fd/archived-price-paid-data-1995-to-2017>. 
 
