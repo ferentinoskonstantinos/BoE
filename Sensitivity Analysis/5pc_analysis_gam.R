@@ -38,7 +38,8 @@ data[cols] <- lapply(data[cols], factor)
 
 # A continuous time covariate called 'Time' is constructed,
 # by calculating the time difference in days between each row's date
-# and the first transaction date of the matched dataset.
+# and the first transaction date of the matched dataset,
+# which is 02/01/2015.
 data$Time<-as.numeric(difftime(data$Date, min(data$Date), units = "days"))
 data<-select(data, -c(Distance, Class, PScores, distance, weights))
 head(data)
