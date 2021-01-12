@@ -62,8 +62,7 @@ The **Main Analysis** folder holds the R scripts required to replicate the resul
 4. **descriptive_statistics.R** contains the code that replicates the descriptive analyses
 5. **prices_map.R** contains the code that constructs a heat map of property prices by regions
 6. **property_map.R** contains the code that constructs a heat map of the number of properties by regions
-7. **propensity_score_matching.R** contains the code that implements Propensity Score Matching to the pre-intervention treated and non-treated properties,
-in order to maximize their comparability
+7. **propensity_score_matching.R** contains the code that implements Propensity Score Matching to the pre-intervention treated and non-treated properties, in order to maximize their comparability
 8. **gam.R** contains the code that presents a novel application of GAMs to assess the assumption that the outcomes in treatment and control group follow the same time trend in the absence of the intervention
 9. **did_analysis.R** contains the code that implements the Difference-in-Difference regression model
 
@@ -79,6 +78,6 @@ The **Comparison of Samples** folder holds the R scripts required to replicate t
 The **Sensitivity Analysis** folder holds the R scripts required to replicate the results of the sensitivity analyses of the report.
 1. **log_prices_analysis.R** contains the code that replicates the sensitivity analysis considering a logarithmic transformation of the prices in the PSM matched dataset
 2. **5pc_analysis_data_processing.R** contains the code that replicates the feature engineering process for the sensitivity analysis that trims at the 5th and 95th percentile of prices
-3. **5pc_analysis_psm.R** contains the code that replicates the PSM analysis for the sensitivity analysis that trims at the 5th and 95th percentile of prices
-4. **5pc_analysis_gam.R** contains the code that replicates the GAM analysis for the sensitivity analysis that trims at the 5th and 95th percentile of prices
+3. **5pc_analysis_psm.R** contains the code that implements Propensity Score Matching to the pre-intervention treated and non-treated properties, in order to maximize their comparability, for the sensitivity analysis that trims at the 5th and 95th percentile of prices
+4. **5pc_analysis_gam.R** contains the code that replicates the novel application of GAMs to assess the assumption that the outcomes in treatment and control group follow the same time trend in the absence of the intervention, for the sensitivity analysis that trims at the 5th and 95th percentile of prices
 5. **5pc_analysis_did.R** contains the code that implements the Difference-in-Difference regression model for the sensitivity analysis that trims at the 5th and 95th percentile of prices
