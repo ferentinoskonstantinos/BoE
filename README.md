@@ -25,6 +25,10 @@ The specific CSV files that need to be downloaded from <https://www.gov.uk/gover
 * part 2 of the 2018 yearly data as a CSV file (part 2) — **pp-2018-part2.csv**
 * the complete 2019 yearly data as a CSV file (complete) — **pp-2019.csv**
 
+At the time of the analysis, I used the **pp-2015.csv** and **pp-2016.csv** complete yearly CSV files instead of the evenly split CSV files **pp-2015-part1.csv**, **pp-2015-part2.csv**, **pp-2016-part1.csv**, and **pp-2016-part2.csv**, that are mentioned above. If there are discrepancies in the data sourcing process due to updates to the CSV files from the HM Land Registry, please do not hesitate to contact me so as to share the specific CSV files I used in the analysis.
+
+> Contains HM Land Registry data © Crown copyright and database right 2020. This data is licensed under the Open Government Licence v3.0.
+
 ### 2. Data on Energy Performance Certificates (EPC)
 
 The second open data source consists of the Energy Performance of Buildings Registers that are the official source for all EPCs issued for all domestic buildings and building units in England and Wales that have been constructed, sold or let since 2008, and are sourced from the Ministry of Housing, Communities & Local Government: <https://epc.opendatacommunities.org/>. 
@@ -46,3 +50,35 @@ The CSV files that are used in the R scripts are:
 ### 5. NUTS Level 1 (January 2018) Full Clipped Boundaries in the United Kingdom
 
 The fifth open data source contains the digital vector boundaries for Nomenclature of Territorial Units for Statistics (NUTS) Level 1, in the United Kingdom, as at January 2018, and are sourced from the Open Geography Portal: <https://geoportal.statistics.gov.uk/datasets/01fd6b2d7600446d8af768005992f76a_0>, in the form of the shapefile **NUTS_Level_1__January_2018__Boundaries-shp.zip** that should be downloaded and extracted to a folder named **NUTS Level 1 shapefiles**.
+
+## Description of R Scripts
+
+### Main Analysis Folder
+
+The **Main Analysis** folder holds the R scripts required to replicate the results of the main analysis of the report.
+1. **data_upload.R** contains the code that uploads the property transactions and EPC datasets
+2. **data_merging.R** contains the code that sets up a panel dataset, combining price transactions with EPC data
+3. **data_processing.R** contains the code that replicates the feature engineering process
+4. **descriptive_statistics.R** contains the code that replicates the descriptive analyses
+5. **prices_map.R** contains the code that constructs a heat map of property prices by regions
+6. **property_map.R** contains the code that constructs a heat map of the number of properties by regions
+7. **propensity_score_matching.R** contains the code that implements Propensity Score Matching to the pre-intervention treated and non-treated properties,
+in order to maximize their comparability
+8. **gam.R** contains the code that presents a novel application of GAMs to assess the assumption that the outcomes in treatment and control group follow the same time trend in the absence of the intervention
+9. **did_analysis.R** contains the code that implements the Difference-in-Difference regression model
+
+### Comparison of Samples Folder
+
+The **Comparison of Samples** folder holds the R scripts required to replicate the comparison of a random sample of the population of all properties and the sample of repeated property sales employed in the main analysis.
+1. **sample_comp_data_upload.R** contains the code that creates a random sample of the population of all properties
+2. **sample_comp_data_processing.R** contains the code that pre-processes both the random sample of the population of all properties and the sample of repeated property sales employed in the main analysis
+3. **sample_comp_table.R** contains the code that compares a random sample of the population of all properties and the sample of repeated property sales employed in the main analysis
+
+### Sensitivity Analysis Folder
+
+The **Sensitivity Analysis** folder holds the R scripts required to replicate the results of the sensitivity analyses of the report.
+1. **log_prices_analysis.R** contains the code that replicates the sensitivity analysis considering a logarithmic transformation of the prices in the PSM matched dataset
+2. **5pc_analysis_data_processing.R** contains the code that replicates the feature engineering process for the sensitivity analysis that trims at the 5th and 95th percentile of prices
+3. **5pc_analysis_psm.R** contains the code that replicates the PSM analysis for the sensitivity analysis that trims at the 5th and 95th percentile of prices
+4. **5pc_analysis_gam.R** contains the code that replicates the GAM analysis for the sensitivity analysis that trims at the 5th and 95th percentile of prices
+5. **5pc_analysis_did.R** contains the code that implements the Difference-in-Difference regression model for the sensitivity analysis that trims at the 5th and 95th percentile of prices
