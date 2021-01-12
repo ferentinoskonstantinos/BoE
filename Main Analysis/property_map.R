@@ -71,7 +71,7 @@ rm(codes, number_NUTS, NUTS, test)
 # in each NUTS Level 1 Region,
 # using the shapefiles found in the NUTS_Level_1__January_2018__Boundaries-shp.zip file,
 # which is downloaded from https://geoportal.statistics.gov.uk/datasets/01fd6b2d7600446d8af768005992f76a_0.
-# We must extract the above zip file to a folder named 'NUTS Level 1 shapefiles'
+# We must extract the above zip file to a folder named NUTS Level 1 shapefiles
 # before uploading them in R.
 shapefile <- readOGR(dsn=paste(my_path, 'NUTS Level 1 shapefiles', sep='\\'), 
                      layer="NUTS_Level_1__January_2018__Boundaries")
