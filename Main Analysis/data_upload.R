@@ -13,7 +13,7 @@ library(data.table)
 
 # After the yearly CSV files for the period 2015-2019,
 # are downloaded from the HM Land Registry website
-# https://data.gov.uk/dataset/314f77b3-e702-4545-8bcb-9ef8262ea0fd/archived-price-paid-data-1995-to-2017,
+# https://www.gov.uk/government/statistical-data-sets/price-paid-data-downloads,
 # I proceed to collate them into a single dataset.
 
 # In order to make the R code portable,
@@ -24,17 +24,29 @@ library(data.table)
 # thus improving its reproducibility.
 my_path<-'data\\'
 
-df_15<-fread(paste(my_path, 'pp-2015.csv', sep='\\'), header=F,
-             data.table=FALSE)
-colnames(df_15)<-c('ID', 'Price', 'Date', 'Postcode', 'Property', 'Age', 'Duration',
-                   'PAON', 'SAON', 'Street', 'Locality', 'Town', 'District', 
-                   'County', 'PPD_type', 'Record_Status')
+df_15_1<-fread(paste(my_path, 'pp-2015-part1.csv', sep='\\'), header=F,
+               data.table=FALSE)
+colnames(df_15_1)<-c('ID', 'Price', 'Date', 'Postcode', 'Property', 'Age', 'Duration',
+                     'PAON', 'SAON', 'Street', 'Locality', 'Town', 'District', 
+                     'County', 'PPD_type', 'Record_Status')
 
-df_16<-fread(paste(my_path, 'pp-2016.csv', sep='\\'), header=F,
-             data.table=FALSE)
-colnames(df_16)<-c('ID', 'Price', 'Date', 'Postcode', 'Property', 'Age', 'Duration',
-                   'PAON', 'SAON', 'Street', 'Locality', 'Town', 'District', 
-                   'County', 'PPD_type', 'Record_Status')
+df_15_2<-fread(paste(my_path, 'pp-2015-part2.csv', sep='\\'), header=F,
+               data.table=FALSE)
+colnames(df_15_2)<-c('ID', 'Price', 'Date', 'Postcode', 'Property', 'Age', 'Duration',
+                     'PAON', 'SAON', 'Street', 'Locality', 'Town', 'District', 
+                     'County', 'PPD_type', 'Record_Status')
+
+df_16_1<-fread(paste(my_path, 'pp-2016-part1.csv', sep='\\'), header=F,
+               data.table=FALSE)
+colnames(df_16_1)<-c('ID', 'Price', 'Date', 'Postcode', 'Property', 'Age', 'Duration',
+                     'PAON', 'SAON', 'Street', 'Locality', 'Town', 'District', 
+                     'County', 'PPD_type', 'Record_Status')
+
+df_16_2<-fread(paste(my_path, 'pp-2016-part2.csv', sep='\\'), header=F,
+               data.table=FALSE)
+colnames(df_16_2)<-c('ID', 'Price', 'Date', 'Postcode', 'Property', 'Age', 'Duration',
+                     'PAON', 'SAON', 'Street', 'Locality', 'Town', 'District', 
+                     'County', 'PPD_type', 'Record_Status')
 
 df_17_1<-fread(paste(my_path, 'pp-2017-part1.csv', sep='\\'), header=F,
                data.table=FALSE)
@@ -61,18 +73,21 @@ colnames(df_18_2)<-c('ID', 'Price', 'Date', 'Postcode', 'Property', 'Age', 'Dura
                      'County', 'PPD_type', 'Record_Status')
 
 df_19<-fread(paste(my_path, 'pp-2019.csv', sep='\\'), header=F,
-             data.table=FALSE)
+               data.table=FALSE)
 colnames(df_19)<-c('ID', 'Price', 'Date', 'Postcode', 'Property', 'Age', 'Duration',
-                   'PAON', 'SAON', 'Street', 'Locality', 'Town', 'District', 
-                   'County', 'PPD_type', 'Record_Status')
+                     'PAON', 'SAON', 'Street', 'Locality', 'Town', 'District', 
+                     'County', 'PPD_type', 'Record_Status')
 
 # Total sample size
-sum(nrow(df_15), nrow(df_16), nrow(df_17_1), nrow(df_17_2), nrow(df_18_1), nrow(df_18_2), nrow(df_19))
+sum(nrow(df_15_1), nrow(df_15_2), nrow(df_16_1), nrow(df_16_2), nrow(df_17_1), nrow(df_17_2), 
+    nrow(df_18_1), nrow(df_18_2), nrow(df_19))
 
 # Merging all the 7 data frames into a single dataset
-data1<-rbind(df_15, df_16, df_17_1, df_17_2, df_18_1, df_18_2, df_19)
+data1<-rbind(df_15_1, df_15_2, df_16_1, df_16_2, df_17_1, df_17_2, 
+             df_18_1, df_18_2, df_19)
 
-rm(df_15, df_16, df_17_1, df_17_2, df_18_1, df_18_2, df_19)
+rm(df_15_1, df_15_2, df_16_1, df_16_2, df_17_1, df_17_2, 
+   df_18_1, df_18_2, df_19)
 
 head(data1)
 
@@ -124,18 +139,21 @@ price_data<-fread(paste(my_path, 'price_data.csv', sep='\\'), header = T,
 head(price_data)
 
 # In order to solve the problem of the large EPC register 
-# (consisting of 340 csv files of total size 16.1 GB), 
+# (consisting of 340 CSV files of total size 16.1 GB), 
 # we upload the files in R in batches of 68 files per data frame 
 # (resulting in five data frames),
 # keeping only those rows corresponding to the Postcodes found in the price dataset,
 # and with dates prior to 2020, since the project focuses on the period 2015-2019.
-# We then save the five data frames as five separate csv files.
+# We then save the five data frames as five separate CSV files.
 
-# After we download the full register, that consists of the 340 data files, 
-# one for each local authority district to which the postcodes of the registered properties 
-# have been assigned, containing all the up to date EPC data from 2008 to the current date,
-# and are sourced from https://epc.opendatacommunities.org/,
-# we produce a list containing the names of files in the directory
+# First we source the EPC data from https://epc.opendatacommunities.org/.
+# The main download option is that of the full register, 
+# that consists of 340 data files, one for each local authority district 
+# to which the postcodes of the registered properties have been assigned, 
+# containing all the up to date EPC data from 2008 to the current date.
+# Hence, the zip file that contains the full register needs to be downloaded 
+# and extracted to a folder named EPC.
+# Then we produce a list containing the names of files in the EPC folder
 # that holds the 340 energy performance certificates.
 file_names<-list.files(paste(my_path, 'EPC', sep='\\'), full.names = TRUE)
 
