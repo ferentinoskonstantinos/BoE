@@ -84,11 +84,13 @@ rm(res, test, unique_ID)
 
 # As a first step, the postcode of each property in the merged dataset 
 # is matched with the corresponding 2011 OAC code, which ranges from 1a1 to 8d3.
-# This was achieved, by downloading the ONS Postcode Directory (ONSPD) for the
+# This was achieved, by sourcing the ONS Postcode Directory (ONSPD) for the
 # United Kingdom in its May 2020 format, 
-# from https://geoportal.statistics.gov.uk/datasets/ons-postcode-directory-may-2020.
+# from https://geoportal.statistics.gov.uk/datasets/ons-postcode-directory-may-2020,
+# in the form of a zip file that should be downloaded 
+# and extracted to a folder named ONSPD.
 # The file we use is the ONSPD_MAY_2020_UK CSV file,
-# that can be found in the Data folder of the downloaded and unzipped ONSPD file,
+# that can be found in the Data folder of the ONSPD folder,
 # which relates both current and terminated UK postcodes 
 # to a range of current area geographies, among them the 2011 OAC codes.
 codes<-fread(paste(my_path, 'ONSPD\\Data\\ONSPD_MAY_2020_UK.csv', sep='\\'), header = T, 
@@ -228,7 +230,7 @@ head(res)
 colnames(res)[20]<-'LAU118CD'
 
 # The file we use is the LAU218_LAU118_NUTS318_NUTS218_NUTS118_UK_LU CSV file,
-# that can be found in the Documents folder of the downloaded and unzipped ONSPD file,
+# that can be found in the Documents folder of the ONSPD folder,
 # that relates the LAU codes and names to the NUTS codes and names, 
 # in their 2018 format.
 codes<-fread(paste(my_path, 'ONSPD\\Documents\\LAU218_LAU118_NUTS318_NUTS218_NUTS118_UK_LU.csv', sep='\\'), header = T, 
