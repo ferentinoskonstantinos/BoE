@@ -51,7 +51,8 @@ data[cols] <- lapply(data[cols], factor)
 
 # A continuous time covariate called 'Time' is constructed,
 # by calculating the time difference in days between each row's date
-# and the first transaction date of the matched dataset.
+# and the first transaction date of the matched dataset,
+# which is 02/01/2015.
 data$Time<-as.numeric(difftime(data$Date, min(data$Date), units = "days"))
 data<-select(data, -c(Distance, Class, PScores, distance, weights))
 head(data)
@@ -80,6 +81,13 @@ b <- getViz(fit)
 # Fitted price trend for properties with EPC rating below E 
 plot(sm(b, 1)) + l_fitLine(colour = "black", size = 0.8) +
   l_ciLine(level = 0.95, colour = "black", linetype = 2, size = 0.8) +
+  
+  # In order to have the X-axis show the year of each observation
+  # and not the time difference in days between each observation's date
+  # and the first transaction date of the matched dataset,
+  # I add the values of the X-axis which correspond to the number of days 
+  # from the first transaction date in our sample (i.e. 02/01/2015) with the date 02/01/2015
+  # and extract the year of the calculated date.
   scale_x_continuous(name="Date",
                      labels=function(x)year(x+ymd("2015-01-02"))) +
   scale_y_continuous(name="Reference Smooth") +
@@ -96,6 +104,13 @@ plot(sm(b, 1)) + l_fitLine(colour = "black", size = 0.8) +
 # Estimated smooth for the difference between 'Below E' and 'Above E'
 plot(sm(b, 2)) + l_fitLine(colour = "black", size = 0.8) +
   l_ciLine(level = 0.95, colour = "black", linetype = 2, size = 0.8) +
+  
+  # In order to have the X-axis show the year of each observation
+  # and not the time difference in days between each observation's date
+  # and the first transaction date of the matched dataset,
+  # I add the values of the X-axis which correspond to the number of days 
+  # from the first transaction date in our sample (i.e. 02/01/2015) with the date 02/01/2015
+  # and extract the year of the calculated date.
   scale_x_continuous(name="Date",
                      labels=function(x)year(x+ymd("2015-01-02"))) +
   scale_y_continuous(name="Difference Smooth") +
