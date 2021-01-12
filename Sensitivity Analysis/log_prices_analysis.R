@@ -45,7 +45,8 @@ data[cols] <- lapply(data[cols], factor)
 
 # A continuous time covariate called 'Time' is constructed,
 # by calculating the time difference in days between each row's date
-# and the first transaction date of the matched dataset.
+# and the first transaction date of the matched dataset,
+# which is 02/01/2015.
 data$Time<-as.numeric(difftime(data$Date, min(data$Date), units = "days"))
 data<-select(data, -c(Distance, Class, PScores, distance, weights))
 head(data)
@@ -178,4 +179,3 @@ did_reg <- plm(log(Price) ~ Post + D, data = d, model = "within")
 summary(did_reg)
 
 coeftest(did_reg, vcov=function(x) vcovHC(x, cluster="group", type="HC1"))
-
