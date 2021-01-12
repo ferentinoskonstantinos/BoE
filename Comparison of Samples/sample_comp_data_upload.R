@@ -17,7 +17,7 @@ library(data.table)
 # thus improving its reproducibility.
 my_path<-'data\\'
 
-# First, we produce a list containing the names of files in the directory
+# First, we produce a list containing the names of files in the EPC folder
 # that holds the 340 energy performance certificates,
 # and we take a random sample of the population of all properties.
 file_names<-list.files(paste(my_path, 'EPC', sep='\\'), full.names = TRUE)
