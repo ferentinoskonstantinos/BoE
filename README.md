@@ -75,7 +75,7 @@ The **Comparison of Samples** folder holds the R scripts required to replicate t
 
 ### Sensitivity Analysis Folder
 
-The **Sensitivity Analysis** folder holds the R scripts required to replicate the results of the sensitivity analyses of the report.
+The **Sensitivity Analysis** folder holds the R scripts required to replicate the results of the two sensitivity analyses of the report.
 1. **log_prices_analysis.R** contains the code that replicates the sensitivity analysis considering a logarithmic transformation of the prices in the PSM matched dataset
 2. **5pc_analysis_data_processing.R** contains the code that replicates the feature engineering process for the sensitivity analysis that trims at the 5th and 95th percentile of prices
 3. **5pc_analysis_psm.R** contains the code that implements Propensity Score Matching to the pre-intervention treated and non-treated properties, in order to maximize their comparability, for the sensitivity analysis that trims at the 5th and 95th percentile of prices
