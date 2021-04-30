@@ -2,7 +2,7 @@ The R scripts in this repository can be used to replicate the results in the pap
 # "Climate Policy and Transition Risk in the Housing Market"
 by
 # Konstantinos Ferentinos & Alex Gibberd & Benjamin Guin
-that is to be published in the Bank of England Staff Working Paper Series.
+that has been published in the Bank of England Staff Working Paper Series: <https://www.bankofengland.co.uk/working-paper/2021/climate-policy-and-transition-risk-in-the-housing-market>.
 
 ## Data Sources
 
