@@ -142,7 +142,7 @@ colnames(diff_data)[3:5] <- gsub(".y", "", colnames(diff_data)[3:5])
 diff_data$ChangeOwnerToRented<-ifelse(diff_data$property %in% ChangeOwnerToRented$property, 1, 0)
 diff_data$ChangeRentedToOwner<-ifelse(diff_data$property %in% ChangeRentedToOwner$property, 1, 0)
 diff_data$RentedToRented<-ifelse(diff_data$property %in% RentedToRented$property, 1, 0)
-diff_data$Post_2019<-ifelse(year(diff_data$Date) >= 2019, 1, 0)
+diff_data$Post_2019<-ifelse(diff_data$Date >= ymd("2019-04-01"), 1, 0)
 
 diff_data<-cbind(diff_data, as.data.frame(one_hot(as.data.table(diff_data$NUTS118NM))))
 diff_data<-cbind(diff_data, as.data.frame(one_hot(as.data.table(diff_data$EPC_LEVEL))))
