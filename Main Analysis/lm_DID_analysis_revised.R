@@ -161,7 +161,6 @@ Table_2_regions_noconstant <- lm(first_diff ~ Below_E_Post_Intervention + V1_Eas
                  V1_Yorkshire_and_The_Humber -1
                , data = diff_data)
 summary(Table_2_regions_noconstant)
-Table_2 <- tidy(Table_2_regions_noconstant)
 
 # DID model: region FE and post 2019 
 Table_3_post2019 <- lm(first_diff ~ Below_E_Post_Intervention 
@@ -173,7 +172,6 @@ Table_3_post2019 <- lm(first_diff ~ Below_E_Post_Intervention
                       V1_Yorkshire_and_The_Humber -1
                     , data = diff_data)
 summary(Table_3_post2019)
-Table_3 <- tidy(Table_3_post2019)
 
 # DID model: region FE and London 
 Table_4_London <- lm(first_diff ~ Below_E_Post_Intervention 
@@ -185,7 +183,6 @@ Table_4_London <- lm(first_diff ~ Below_E_Post_Intervention
                       V1_Yorkshire_and_The_Humber 
                     , data = diff_data)
 summary(Table_4_London)
-Table_4 <- tidy(Table_4_London)
 
 # DID model: region FE and change in tenure 
 Table_5_Tenure <- lm(first_diff ~ Below_E_Post_Intervention 
@@ -200,4 +197,3 @@ Table_5_Tenure <- lm(first_diff ~ Below_E_Post_Intervention
                       V1_Yorkshire_and_The_Humber -1
                     , data = diff_data)
 summary(Table_5_Tenure)
-Table_5 <- tidy(Table_5_Tenure)
